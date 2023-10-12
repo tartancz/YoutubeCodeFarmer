@@ -96,7 +96,6 @@ class Farmer:
                 code = self.get_code(imag)
                 if code:
                     logging.info(f"Code was found with text '{code}'")
-                    cv2.imwrite(video_path / "imag" / f"image{editor.current_frame}.png", imag)
                     status = self.wolt.redeem_code(code[-12:])
                     if status == CodeState.SUCCESSFULLY_REDEEM or status == CodeState.EXPIRED or status.ALREADY_TAKEN:
                         return (status, code, editor.current_frame)
