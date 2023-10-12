@@ -96,6 +96,7 @@ class Farmer:
                 code = self.get_code(imag)
                 if code:
                     logging.info(f"Code was found with text '{code}'")
+                    #cv2.imwrite(video_path / "imag" / f"image{editor.current_frame}.png", imag) TODO: fix, crashing when its folder its not created
                     status = self.wolt.redeem_code(code[-12:])
                     if status == CodeState.SUCCESSFULLY_REDEEM or status == CodeState.EXPIRED or status.ALREADY_TAKEN:
                         return (status, code, editor.current_frame)
@@ -112,7 +113,6 @@ class Farmer:
         code: str |None,
         frame: int | None
         ):
-        print(datetime.utcnow(), publish_time)
         self.video_model.insert(
             video_id=video_id,
             publish_time=publish_time,
