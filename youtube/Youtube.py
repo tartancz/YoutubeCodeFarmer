@@ -13,7 +13,7 @@ from pytube import YouTube as pytube_youtube
 
 from youtube.errrors import VideoDoNotExistException, PathIsNotFileException
 
-RESET_UNITS_TIME = time(2, tzinfo=pytz.UTC)
+RESET_UNITS_TIME = time(7, tzinfo=pytz.UTC)
 
 @dataclass
 class Video:
