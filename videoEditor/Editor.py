@@ -1,6 +1,7 @@
 import logging
 from functools import cached_property
 from pathlib import Path
+import os
 
 import cv2
 
@@ -15,9 +16,10 @@ if TYPE_CHECKING:
 class Editor:
     video: cv2.VideoCapture | None = None
 
-    def __init__(self, video_path: Path):
+    def __init__(self, video_path: Path, delete_video_after_exit: bool = True):
         self.video_path = str(video_path.absolute())
         self.current_frame = 1
+        self._delete_video_after_exit = delete_video_after_exit
 
     @cached_property
     @opened_or_throw_error
@@ -102,6 +104,10 @@ class Editor:
             raise AttributeError("Video is already opened")
         self.video = cv2.VideoCapture(self.video_path)
 
+    def _delete_video(self):
+        if self._delete_video_after_exit:
+            os.remove(self.video_path)
+
     def close_video(self):
         """
         close cv2.VideoCapture class of video and set video to None
@@ -112,3 +118,4 @@ class Editor:
         self.current_frame = 0
         self.video.release()
         self.video = None
+        self._delete_video()

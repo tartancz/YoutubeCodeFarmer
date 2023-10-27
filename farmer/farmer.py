@@ -88,7 +88,7 @@ class Farmer:
             code = self.secondary_ocr.get_text(imag)
         return code
 
-    def process_video(self, video_path: Path) -> (CodeState, str | None, int | None):
+    def process_video(self, video_path: Path) -> tuple[CodeState, str | None, int | None]:
         status: CodeState = None
         with Editor(video_path=(video_path / self.video_name)) as editor:
             editor.set_frame(editor.frame_count - 1)
@@ -96,7 +96,6 @@ class Farmer:
                 code = self.get_code(imag)
                 if code:
                     logging.info(f"Code was found with text '{code}'")
-                    #cv2.imwrite(video_path / "imag" / f"image{editor.current_frame}.png", imag) TODO: fix, crashing when its folder its not created
                     status = self.wolt.redeem_code(code[-12:])
                     if status == CodeState.SUCCESSFULLY_REDEEM or status == CodeState.EXPIRED or status.ALREADY_TAKEN:
                         return (status, code, editor.current_frame)
@@ -160,7 +159,10 @@ class Farmer:
                 frame=frame,
                 code=code,
             )
-            #TODO: add logging and discord
+            if status == CodeState.SUCCESSFULLY_REDEEM:
+                self.discord.send(f"Code sucesfully redeem {code}, duration was {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
+            else:
+                self.discord.send(f"Something went wrong, code: {status.name}, duration was  {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
 
 
     def farm(self):
@@ -182,8 +184,8 @@ class Farmer:
             editor.set_frame(editor.frame_count - 1)
             for imag in editor.iterate_thought_video():
                 found = False
-                code = self.primary_ocr.get_text(imag)
-                print(editor.current_frame)
+                code = self.get_code(imag)
+                print(editor.current_frame, code)
                 editor.add_frames(-20)
 
 
