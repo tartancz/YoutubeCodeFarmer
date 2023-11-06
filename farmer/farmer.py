@@ -160,9 +160,9 @@ class Farmer:
                 code=code,
             )
             if status == CodeState.SUCCESSFULLY_REDEEM:
-                self.discord.send(f"Code sucesfully redeem {code}, duration was {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
+                self.send_message_discord(f"Code sucesfully redeem {code}, duration was {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
             else:
-                self.discord.send(f"Something went wrong, code: {status.name}, duration was  {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
+                self.send_message_discord(f"Something went wrong, code: {status.name}, duration was  {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
 
 
     def farm(self):
@@ -170,7 +170,7 @@ class Farmer:
         try:
             self._farm()
         except Exception as e:
-            self.discord.send(e)
+            self.send_message_discord(e)
             logging.exception(e)
             # if len(failures) < 5:
             #     failures.append(datetime.now())
