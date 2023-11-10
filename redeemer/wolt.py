@@ -15,8 +15,6 @@ ACCESS_TOKEN_URL = 'https://authentication.wolt.com/v1/wauth2/access_token'
 REDEEM_DISCOUNT_URL = 'https://restaurant-api.wolt.com/v2/credit_codes/consume'
 
 
-
-
 class Wolt(Redeemer):
     def __init__(self, token_model: TokenModel):
         self.token_model = token_model
@@ -63,8 +61,6 @@ class Wolt(Redeemer):
             self.get_new_token()
 
         response = self._make_request_to_code_redeem(code)
-        print(response.json())
-        print(response.status_code)
         if response.status_code == 401:
             raise WoltNotAuthorizedException("Wolt is not authorized, use get_new_token function.")
         elif response.status_code == 404:
@@ -79,7 +75,6 @@ class Wolt(Redeemer):
         elif response.status_code == 201:
             return CodeState.SUCCESSFULLY_REDEEM
 
-
     def _make_request_to_code_redeem(self, code: str) -> 'Response':
         headers = {
             'accept': 'application/json, text/plain, */*',
@@ -91,4 +86,5 @@ class Wolt(Redeemer):
         return requests.post(REDEEM_DISCOUNT_URL, headers=headers, json=data)
 
     def is_token_expired(self) -> bool:
-        return self.actual_token.created + timedelta(seconds=self.actual_token.expires_in - 10) <= datetime.utcnow() # - 10 is buffer for delay
+        return self.actual_token.created + timedelta(
+            seconds=self.actual_token.expires_in - 10) <= datetime.utcnow()  # - 10 is buffer for delay

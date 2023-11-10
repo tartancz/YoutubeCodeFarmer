@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 
+
 class CodeState(Enum):
     SUCCESSFULLY_REDEEM = auto()
     ALREADY_TAKEN = auto()

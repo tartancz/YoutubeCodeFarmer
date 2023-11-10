@@ -1,11 +1,14 @@
 import datetime
 from pathlib import Path
 
-from youtube import Youtube, Video
 from pytz import UTC
+
+from youtube import Youtube, Video
+
 
 class ProgramEndedException(Exception):
     pass
+
 
 class Youtube_mock():
     def __init__(self,
@@ -42,4 +45,3 @@ class Youtube_mock():
     @staticmethod
     def download_video(video_url, save_path: Path | str) -> bool:
         Youtube.download_video(video_url, save_path)
-

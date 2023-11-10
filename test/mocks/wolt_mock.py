@@ -1,5 +1,6 @@
 from redeemer import Redeemer, CodeState
 
+
 class Wolt(Redeemer):
     def __init__(self, token_model):
         self.token_model = token_model

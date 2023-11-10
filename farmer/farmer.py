@@ -1,16 +1,16 @@
 import logging
+import os
+import re
+import sqlite3
+import time
 from datetime import datetime
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytz
 
 from redeemer.wolt import CodeState
 from videoEditor import Editor
-import sqlite3
-from typing import TYPE_CHECKING
-from pathlib import Path
-
-import time
-
 
 if TYPE_CHECKING:
     from database.models import VideoModel, YtChannelModel, DiscountModel
@@ -21,20 +21,20 @@ if TYPE_CHECKING:
     import cv2
 
 
-
-
-
 class Farmer:
     video_name = "video.mp4"
+
     def __init__(self,
                  primary_ocr: 'OCR',  # faster ocr but less accurate
+                 code_regex: str,
                  video_model: 'VideoModel',
                  yt_channel_model: 'YtChannelModel',
                  discount_model: 'DiscountModel',
                  wolt: 'Redeemer',  # Wolt class for handling interaction with redeemer website
                  youtube: 'Youtube',
-                 secondary_ocr: 'OCR' = None,  # slower ocr but way more accurate, if not inserted then will always use primary_ocr
-                 discord: 'Discord' = None # discord for notification
+                 secondary_ocr: 'OCR' = None,
+                 # slower ocr but way more accurate, if not inserted then will always use primary_ocr
+                 discord: 'Discord' = None,  # discord for notification
                  ):
         self.primary_ocr = primary_ocr
         self.video_model = video_model
@@ -44,6 +44,7 @@ class Farmer:
         self.youtube = youtube
         self.secondary_ocr = secondary_ocr
         self.discord = discord
+        self.compiled_regex = re.compile(code_regex)
 
         self.insert_to_db_youtube_channel_if_not_exist()
         self.insert_latest_videos()
@@ -77,41 +78,41 @@ class Farmer:
                 return video
             time.sleep(10)
 
-
     def send_message_discord(self, msg: str):
         if self.discord:
             self.discord.send(msg)
 
-    def get_code(self, imag: 'cv2.typing.MatLike') -> str:
-        code = self.primary_ocr.get_text(imag)
-        if code and self.secondary_ocr is not None:
-            code = self.secondary_ocr.get_text(imag)
-        return code
+    def get_text(self, imag: 'cv2.typing.MatLike') -> str:
+        text = self.primary_ocr.get_text(imag)
+        if text and self.secondary_ocr is not None:
+            text = self.secondary_ocr.get_text(imag)
+        return text
 
-    def process_video(self, video_path: Path) -> tuple[CodeState, str | None, int | None]:
-        status: CodeState = None
+    def process_video(self, video_path: Path) -> tuple[CodeState | None, str | None, int | None]:
+        status: CodeState | None = None
         with Editor(video_path=(video_path / self.video_name)) as editor:
             editor.set_frame(editor.frame_count - 1)
             for imag in editor.iterate_thought_video():
-                code = self.get_code(imag)
+                text = self.get_text(imag)
+                code = self.compiled_regex.findall(text)
                 if code:
-                    logging.info(f"Code was found with text '{code}'")
-                    status = self.wolt.redeem_code(code[-12:])
+                    logging.info(f"Code was found with text '{text}'")
+                    status = self.wolt.redeem_code(code[0])
                     if status == CodeState.SUCCESSFULLY_REDEEM or status == CodeState.EXPIRED or status.ALREADY_TAKEN:
-                        return (status, code, editor.current_frame)
+                        return status, text, editor.current_frame
                     elif status == CodeState.TOO_MANY_REQUESTS:
                         time.sleep(10)
                 editor.add_frames(int(-editor.FPS * 2))
-        return (status, None, None)
+        return status, None, None
 
     def create_database_log(
-        self,
-        status: CodeState,
-        video_id: str,
-        publish_time: datetime,
-        code: str |None,
-        frame: int | None
-        ):
+            self,
+            status: CodeState,
+            video_id: str,
+            publish_time: datetime,
+            code: str | None,
+            frame: int | None
+    ):
         self.video_model.insert(
             video_id=video_id,
             publish_time=publish_time,
@@ -121,14 +122,12 @@ class Farmer:
         )
         self.discount_model.insert(
             video_id=video_id,
-            was_right= (status != CodeState.BAD_CODE),
-            how_long_to_process = (datetime.now(tz=pytz.UTC) - publish_time).seconds,
-            activated_by_me= status == CodeState.SUCCESSFULLY_REDEEM,
-            code= code,
+            was_right=(status != CodeState.BAD_CODE),
+            how_long_to_process=(datetime.now(tz=pytz.UTC) - publish_time).seconds,
+            activated_by_me=status == CodeState.SUCCESSFULLY_REDEEM,
+            code=code,
             frame=frame
         )
-
-
 
     def _farm(self):
         logging.info("starting farmer")
@@ -140,7 +139,7 @@ class Farmer:
             logging.info(f"new video with ID {new_video_id}")
             self.send_message_discord(f"new video with ID {new_video_id}")
             detailed_new_video = self.youtube.get_details_about_video(new_video_id)
-            if not "wolt" in detailed_new_video.description.lower():
+            if not "wolt" in detailed_new_video.description.lower() and not os.environ.get("FORCE_SEARCH", False):
                 self.video_model.insert(
                     video_id=detailed_new_video.id,
                     publish_time=detailed_new_video.published_time,
@@ -160,22 +159,27 @@ class Farmer:
                 code=code,
             )
             if status == CodeState.SUCCESSFULLY_REDEEM:
-                self.send_message_discord(f"Code sucesfully redeem {code}, duration was {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
+                self.send_message_discord(
+                    f"Code sucesfully redeem {code}, duration was {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
             else:
-                self.send_message_discord(f"Something went wrong, code: {status.name}, duration was  {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
-
+                self.send_message_discord(
+                    f"Something went wrong, code: {status.name}, duration was  {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
 
     def farm(self):
+        self.discord.send("farming  Created")
         failures = list()
-        try:
-            self._farm()
-        except Exception as e:
-            self.send_message_discord(e)
-            logging.exception(e)
-            # if len(failures) < 5:
-            #     failures.append(datetime.now())
-            # else:
-
+        while True:
+            try:
+                self._farm()
+            except Exception as e:
+                self.discord.send(str(e))
+                logging.exception(e)
+                failures.append(time.time())
+                if len(failures) < 5:
+                    continue
+                oldest_exc = failures.pop(0)
+                if time.time() - oldest_exc < 1800:
+                    return
 
     def find_text(self, url):
         self.youtube.download_video(url, Path("./temp/video.mp4"))
@@ -184,9 +188,6 @@ class Farmer:
             editor.set_frame(editor.frame_count - 1)
             for imag in editor.iterate_thought_video():
                 found = False
-                code = self.get_code(imag)
+                code = self.get_text(imag)
                 print(editor.current_frame, code)
                 editor.add_frames(-20)
-
-
-

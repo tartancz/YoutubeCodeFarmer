@@ -1,6 +1,4 @@
-
 import requests
-
 
 
 class Discord:
@@ -10,7 +8,6 @@ class Discord:
                  ):
         self.channel_id = channel_id
         self.bot_token = bot_token
-
 
     def send(self, message: str) -> None:
         requests.post(

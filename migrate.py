@@ -11,6 +11,7 @@ def migrate(conn_str: str):
         cur.executescript(f.read())
     conn.commit()
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="migration",

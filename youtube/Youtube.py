@@ -3,10 +3,10 @@ import logging
 import re
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta
-import pytz
 from pathlib import Path
 from time import sleep
 
+import pytz
 import requests
 from dateutil import parser
 from pytube import YouTube as pytube_youtube
@@ -14,6 +14,7 @@ from pytube import YouTube as pytube_youtube
 from youtube.errrors import VideoDoNotExistException, PathIsNotFileException
 
 RESET_UNITS_TIME = time(7, tzinfo=pytz.UTC)
+
 
 @dataclass
 class Video:
@@ -109,7 +110,6 @@ class Youtube:
     @staticmethod
     def _parse_datetime(date_str: str) -> datetime:
         return parser.parse(date_str)
-
 
     def video_count(self) -> int:
         """

@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from database.errors import RowDontExistException
-
 if TYPE_CHECKING:
     from sqlite3 import Connection
 

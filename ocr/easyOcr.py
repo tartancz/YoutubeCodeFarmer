@@ -1,17 +1,17 @@
+from typing import TYPE_CHECKING
+
 import easyocr
 
 from .ocr import OCR
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cv2.typing import MatLike
 
-class EasyOcr(OCR):
-    @property
-    def search_value(self):
-        return "Kod na WOLT - AG100"
 
-    def __init__(self):
+class EasyOcr(OCR):
+
+    def __init__(self, search_value: str):
+        super().__init__(search_value)
         self.reader = easyocr.Reader(['en'])
 
     def parse(self, image: 'MatLike') -> list[str]:

@@ -1,14 +1,14 @@
 import logging
+import os
 from functools import cached_property
 from pathlib import Path
-import os
+from typing import TYPE_CHECKING
 
 import cv2
 
 from .Decorator import opened_or_throw_error
 from .Errors import frameIsOutOfFrameCountException
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Iterator
 
@@ -51,7 +51,6 @@ class Editor:
                 yield self._get_image()
             except frameIsOutOfFrameCountException:
                 break
-
 
     def _add_frames(self, add_count: int | float):
 

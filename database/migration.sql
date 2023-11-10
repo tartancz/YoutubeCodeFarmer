@@ -26,8 +26,8 @@ CREATE TABLE "discount"
 (
     "id"                  integer PRIMARY KEY,
     "video_id"            integer REFERENCES video (video_id) NOT NULL,
-    "code"                nvarchar                            NOT NULL,
-    "frame"               int                                 NOT NULL,
+    "code"                nvarchar,
+    "frame"               int,
     "was_right"           bool                                NOT NULL,
     "activated_by_me"     bool                                NOT NULL,
     "how_long_to_process" NUMERIC(8, 2)                       NOT NULL

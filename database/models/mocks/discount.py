@@ -21,6 +21,7 @@ class DiscountModel:
     def __init__(self, db: 'Connection'):
         self._db = db
         self._Discount: None | Discount = None
+
     def insert(self,
                video_id: str,
                code: str,
@@ -31,11 +32,11 @@ class DiscountModel:
                ) -> int:
         self._Discount = Discount(
             id=1,
-            video_id = video_id,
-            code =  code,
-            frame = frame,
-            was_right =   was_right,
-            activated_by_me = activated_by_me,
-            how_long_to_process = how_long_to_process
+            video_id=video_id,
+            code=code,
+            frame=frame,
+            was_right=was_right,
+            activated_by_me=activated_by_me,
+            how_long_to_process=how_long_to_process
         )
         return 1

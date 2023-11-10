@@ -1,17 +1,17 @@
+from typing import TYPE_CHECKING
+
 from paddleocr import PaddleOCR as Paddle
 
 from .ocr import OCR
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cv2.typing import MatLike
 
-class PaddleOcr(OCR):
-    @property
-    def search_value(self):
-        return "Kod na WOLT - AG100"
 
-    def __init__(self):
+class PaddleOcr(OCR):
+
+    def __init__(self, search_value: str):
+        super().__init__(search_value)
         self.reader = Paddle(lang='en', show_log=False, use_gpu=False)
 
     def parse(self, image: 'MatLike') -> list[str]:
