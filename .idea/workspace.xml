@@ -4,25 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5192189e-7649-4846-b1a7-afbeefa7ce40" name="Changes" comment="Fixed crashing when discord is None">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/farming-wolt.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/farming-wolt.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/prettier.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migration.sql" beforeDir="false" afterPath="$PROJECT_DIR$/database/migration.sql" afterDir="false" />
+    <list default="true" id="5192189e-7649-4846-b1a7-afbeefa7ce40" name="Changes" comment="formatting and minor changes and fixed .idea">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/farmer/farmer.py" beforeDir="false" afterPath="$PROJECT_DIR$/farmer/farmer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ocr/easyOcr.py" beforeDir="false" afterPath="$PROJECT_DIR$/ocr/easyOcr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ocr/ocr.py" beforeDir="false" afterPath="$PROJECT_DIR$/ocr/ocr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ocr/paddleOcr.py" beforeDir="false" afterPath="$PROJECT_DIR$/ocr/paddleOcr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/redeemer/wolt.py" beforeDir="false" afterPath="$PROJECT_DIR$/redeemer/wolt.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/conftest.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -124,7 +108,8 @@
       <workItem from="1699346460348" duration="778000" />
       <workItem from="1699379323559" duration="12000" />
       <workItem from="1699388694276" duration="3914000" />
-      <workItem from="1699602866002" duration="27000" />
+      <workItem from="1699602866002" duration="4312000" />
+      <workItem from="1699875214982" duration="1759000" />
     </task>
     <task id="LOCAL-00001" summary="Fixed crashing when discord is None">
       <option name="closed" value="true" />
@@ -134,7 +119,31 @@
       <option name="project" value="LOCAL" />
       <updated>1699261657404</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="formatting and minor changes">
+      <option name="closed" value="true" />
+      <created>1699603601971</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1699603601971</updated>
+    </task>
+    <task id="LOCAL-00003" summary="formatting and minor changes and fixed .diea">
+      <option name="closed" value="true" />
+      <created>1699603611519</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1699603611519</updated>
+    </task>
+    <task id="LOCAL-00004" summary="formatting and minor changes and fixed .idea">
+      <option name="closed" value="true" />
+      <created>1699603682173</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1699603682173</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -142,7 +151,10 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Fixed crashing when discord is None" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed crashing when discord is None" />
+    <MESSAGE value="formatting and minor changes" />
+    <MESSAGE value="formatting and minor changes and fixed .diea" />
+    <MESSAGE value="formatting and minor changes and fixed .idea" />
+    <option name="LAST_COMMIT_MESSAGE" value="formatting and minor changes and fixed .idea" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/farming_wolt$_pokus.coverage" NAME="_pokus Coverage Results" MODIFIED="1699277432743" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

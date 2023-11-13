@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytz
+import requests.exceptions
 
 from redeemer.wolt import CodeState
 from videoEditor import Editor
@@ -57,7 +58,7 @@ class Farmer:
             pass
 
     def insert_latest_videos(self):
-        logging.debug("inserting latest videos to db")
+        logging.info("inserting latest videos to db")
         for video in self.youtube.latest_uploaded_videos():
             try:
                 self.video_model.insert(
@@ -66,7 +67,9 @@ class Farmer:
                     publish_time=video.published_time,
                     skipped_finding=True
                 )
+                logging.debug(f"Inserted video {video.id} with publish time {video.published_time}")
             except sqlite3.IntegrityError:
+                logging.debug(f"{video.id} is already in db")
                 pass
 
     def get_new_video_id(self) -> str:
@@ -79,8 +82,11 @@ class Farmer:
             time.sleep(10)
 
     def send_message_discord(self, msg: str):
-        if self.discord:
-            self.discord.send(msg)
+        try:
+            if self.discord:
+                self.discord.send(msg)
+        except Exception:
+            pass
 
     def get_text(self, imag: 'cv2.typing.MatLike') -> str:
         text = self.primary_ocr.get_text(imag)
@@ -171,23 +177,24 @@ class Farmer:
         while True:
             try:
                 self._farm()
+            except requests.exceptions.ConnectionError:
+                # when internet connection is lost, will start pinging to google.com until response come successfully back
+                logging.info(f"Not connection to internet")
+                while True:
+                    try:
+                        requests.get("https://www.google.com")
+                    except Exception:
+                        time.sleep(10)
+                        continue
+                    break
             except Exception as e:
+                #any other is logged
                 self.discord.send(str(e))
                 logging.exception(e)
-                failures.append(time.time())
-                if len(failures) < 5:
-                    continue
-                oldest_exc = failures.pop(0)
-                if time.time() - oldest_exc < 1800:
-                    return
-
-    def find_text(self, url):
-        self.youtube.download_video(url, Path("./temp/video.mp4"))
-        with Editor(video_path=Path("./temp/video.mp4")) as editor:
-            print("video")
-            editor.set_frame(editor.frame_count - 1)
-            for imag in editor.iterate_thought_video():
-                found = False
-                code = self.get_text(imag)
-                print(editor.current_frame, code)
-                editor.add_frames(-20)
+            #if more then 5 failures in time windows program will end
+            failures.append(time.time())
+            if len(failures) < 5:
+                continue
+            oldest_exc = failures.pop(0)
+            if time.time() - oldest_exc < 1800:
+                return
