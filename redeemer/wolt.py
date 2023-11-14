@@ -1,3 +1,5 @@
+import logging
+import os
 from datetime import timedelta, datetime
 from typing import TYPE_CHECKING
 
@@ -13,6 +15,10 @@ if TYPE_CHECKING:
 
 ACCESS_TOKEN_URL = 'https://authentication.wolt.com/v1/wauth2/access_token'
 REDEEM_DISCOUNT_URL = 'https://restaurant-api.wolt.com/v2/credit_codes/consume'
+
+logger = logging.getLogger(os.environ.get("LOGGER_NAME", "FARMER"))
+
+
 
 
 class Wolt(Redeemer):
@@ -30,7 +36,7 @@ class Wolt(Redeemer):
         will make request for new token to Wolt, then will save response in database and set self.actual_token
         :param refresh_token: refresh token for Wolt
         """
-
+        logger.debug("getting new wolt token")
         response = self.make_request_to_new_token(refresh_token)
         response_json = response.json()
         token_id = self.token_model.insert(
@@ -57,10 +63,12 @@ class Wolt(Redeemer):
         self._get_new_token(self.actual_token.refresh_token)
 
     def redeem_code(self, code: str) -> CodeState:
+        logger.debug(f"redeeming code : {code}")
         if self.is_token_expired():
             self.get_new_token()
 
         response = self._make_request_to_code_redeem(code)
+        logger.debug(f"Response from Wolt is: {response.status_code}")
         if response.status_code == 401:
             raise WoltNotAuthorizedException("Wolt is not authorized, use get_new_token function.")
         elif response.status_code == 404:

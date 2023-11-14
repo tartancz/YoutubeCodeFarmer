@@ -1,3 +1,5 @@
+import logging
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -6,6 +8,8 @@ from ..errors import RowDontExistException
 
 if TYPE_CHECKING:
     from sqlite3 import Connection
+
+logger = logging.getLogger(os.environ.get("LOGGER_NAME", "FARMER"))
 
 
 @dataclass
@@ -27,8 +31,10 @@ class TokenModel:
             INSERT INTO token (refresh_token, token, expires_in)
             VALUES (?, ?, ?);
         '''
+        logger.debug(f"inserting Token to db with refresh_token: {refresh_token}, token: {token}, expires_in: {expires_in}")
         self._cursor.execute(insert_query, [refresh_token, token, expires_in])
         self._db.commit()
+
         return self._cursor.lastrowid
 
     def get_by_id(self, token_id: int) -> Token:
@@ -38,9 +44,11 @@ class TokenModel:
             WHERE id = ?
             LIMIT 1;
         '''
+        logger.debug(f"getting token by id: {token_id}")
         self._cursor.execute(select_query, [token_id])
         token_row = self._cursor.fetchone()
         if not token_row:
+            logger.debug(f"token with id {token_id} was not found")
             raise RowDontExistException(f"Token with id {token_id} do not exist")
         return Token(*token_row)
 
@@ -51,6 +59,7 @@ class TokenModel:
             WHERE token=? OR refresh_token=?
             LIMIT 1;
         '''
+        logger.debug(f"getting token token : {token} or by refresh_token : {refresh_token} ")
         self._cursor.execute(select_query, [token, refresh_token])
         token_row = self._cursor.fetchone()
         if not token_row:
@@ -64,6 +73,7 @@ class TokenModel:
             ORDER BY created DESC
             LIMIT 1;
         '''
+        logger.debug("getting the latest token")
         self._cursor.execute(select_query)
         token_row = self._cursor.fetchone()
         if not token_row:

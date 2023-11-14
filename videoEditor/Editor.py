@@ -12,6 +12,8 @@ from .Errors import frameIsOutOfFrameCountException
 if TYPE_CHECKING:
     from typing import Iterator
 
+logger = logging.getLogger(os.environ.get("LOGGER_NAME", "FARMER"))
+
 
 class Editor:
     video: cv2.VideoCapture | None = None
@@ -53,7 +55,6 @@ class Editor:
                 break
 
     def _add_frames(self, add_count: int | float):
-
         self._set_frame(self.current_frame + add_count)
 
     @opened_or_throw_error
@@ -61,7 +62,7 @@ class Editor:
         self._add_frames(add_count)
 
     def _set_frame(self, cur_frame: int | float):
-        logging.debug(f"setting frame on {cur_frame}")
+        logger.debug(f"setting frame on {cur_frame}")
         self.current_frame = cur_frame
         self.video.set(cv2.CAP_PROP_POS_FRAMES, cur_frame)
 
@@ -70,7 +71,7 @@ class Editor:
         self._set_frame(cur_frame)
 
     def _get_image(self) -> cv2.typing.MatLike:
-        logging.debug("Getting image of current frame")
+        logger.debug("Getting image of current frame")
         ret, img = self.video.read()
         if not ret or self.current_frame < 0:
             raise frameIsOutOfFrameCountException(
@@ -98,20 +99,21 @@ class Editor:
         """
         Open cv2.VideoCapture class of video
         """
-        logging.info(f"Opening video {self.video_path}")
+        logger.info(f"Opening video {self.video_path}")
         if self.video is not None:
             raise AttributeError("Video is already opened")
         self.video = cv2.VideoCapture(self.video_path)
 
     def _delete_video(self):
         if self._delete_video_after_exit:
+            logger.info("Deleting video")
             os.remove(self.video_path)
 
     def close_video(self):
         """
         close cv2.VideoCapture class of video and set video to None
         """
-        logging.info(f"Closing video {self.video_path}")
+        logger.info(f"Closing video {self.video_path}")
         if self.video is None:
             raise AttributeError("Video is already closed")
         self.current_frame = 0

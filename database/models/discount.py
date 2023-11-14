@@ -1,9 +1,12 @@
+import os
 from dataclasses import dataclass
-
+import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlite3 import Connection
+
+logger = logging.getLogger(os.environ.get("LOGGER_NAME", "FARMER"))
 
 
 @dataclass
@@ -34,6 +37,8 @@ class DiscountModel:
             INSERT INTO discount (video_id, code, frame, was_right, activated_by_me, how_long_to_process)
             VALUES (?, ?, ?, ?, ?, ?)
         '''
+
         self._cursor.execute(insert_query, [video_id, code, frame, was_right, activated_by_me, how_long_to_process])
         self._db.commit()
+        logger.debug(f"inserting discount to db with video_id:{video_id}, code:{code}, frame:{frame}, was_right:{was_right}, activated_by_me:{activated_by_me}, how_long_to_process:{how_long_to_process}")
         return self._cursor.lastrowid

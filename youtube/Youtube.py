@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import re
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta
@@ -12,6 +13,8 @@ from dateutil import parser
 from pytube import YouTube as pytube_youtube
 
 from youtube.errrors import VideoDoNotExistException, PathIsNotFileException
+
+logger = logging.getLogger(os.environ.get("LOGGER_NAME", "FARMER"))
 
 RESET_UNITS_TIME = time(7, tzinfo=pytz.UTC)
 
@@ -48,9 +51,9 @@ class Youtube:
         return self._used_points
 
     def get_video_count_url(self):
-        '''
+        """
         This method cost 1 unit
-        '''
+        """
         return f"https://youtube.googleapis.com/youtube/v3/channels?part=statistics&id={self.youtube_id}&key={self.API_KEY}"
 
     def get_last_videos_url(self, count=10):
@@ -77,13 +80,13 @@ class Youtube:
         :param save_path: path to save to video
         :return:
         '''
-        logging.info(f"dowloanding video {video_url}")
+        logger.info(f"dowloanding video {video_url}")
         if save_path is str:
             save_path = Path(save_path)
         Youtube.create_folder(save_path)
         ytb = pytube_youtube(video_url)
         video = ytb.streams.filter(file_extension="mp4").order_by('resolution').asc().first()
-        return bool(video.download(filename=save_path))
+        return bool(video.download(filename=save_path, ))
 
     @staticmethod
     def get_next_reset_units_datetime() -> datetime:
@@ -117,7 +120,7 @@ class Youtube:
         :return: number of videos on channel
         """
         self._used_points += 1
-        logging.debug(f"Used Channels endpoint - costs 1 units - have used {self.used_units} units - ")
+        logger.debug(f"Used Channels endpoint - costs 1 units - have used {self.used_units} units - ")
         response = requests.get(self.get_video_count_url())
         return json.loads(response.text)["items"][0]["statistics"]["videoCount"]
 
@@ -143,7 +146,7 @@ class Youtube:
             self._previos_video_count = actual_video_count
         # new video
         if actual_video_count != self._previos_video_count:
-            logging.info(f"video count has changed from {self._previos_video_count} to {actual_video_count}")
+            logger.info(f"video count has changed from {self._previos_video_count} to {actual_video_count}")
             self._previos_video_count = actual_video_count
             return True
         return False
@@ -155,7 +158,7 @@ class Youtube:
         :return: list of Video
         '''
         self._used_points += 100
-        logging.debug(f"Used SEARCH LIST - costs 100 units - have used {self.used_units} units - ")
+        logger.debug(f"Used SEARCH LIST - costs 100 units - have used {self.used_units} units - ")
         request = requests.get(self.get_last_videos_url(count))
         parsed_req = json.loads(request.text)
         videos = []
@@ -165,7 +168,7 @@ class Youtube:
                 url=Youtube.get_video_url(video_id=item["id"]["videoId"]),
                 published_time=Youtube._parse_datetime(item["snippet"]["publishedAt"])
             )
-            logging.debug(f"latest uploaded videos: {video.url} published at {video.published_time}")
+            logger.debug(f"latest uploaded videos: {video.url} published at {video.published_time}")
             videos.append(video)
         return videos
 
@@ -176,7 +179,7 @@ class Youtube:
         :return: Video with description and published_at
         '''
         self._used_points += 100
-        logging.debug(f"Used VIDEO LIST - costs 100 units - have used {self.used_units} units - ")
+        logger.debug(f"Used VIDEO LIST - costs 100 units - have used {self.used_units} units - ")
         request = requests.get(self.get_details_about_video_url(video_id))
         parsed_req = json.loads(request.text)
         if len(parsed_req["items"]) < 1:

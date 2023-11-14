@@ -21,6 +21,8 @@ if TYPE_CHECKING:
     from discord import Discord
     import cv2
 
+logger = logging.getLogger(os.environ.get("LOGGER_NAME", "FARMER"))
+
 
 class Farmer:
     video_name = "video.mp4"
@@ -53,12 +55,12 @@ class Farmer:
     def insert_to_db_youtube_channel_if_not_exist(self):
         try:
             self.yt_channel_model.insert(self.youtube.youtube_id)
-            logging.info(f"created youtuber model with {self.youtube.youtube_id}")
+            logger.info(f"created youtuber model with {self.youtube.youtube_id}")
         except sqlite3.IntegrityError:
             pass
 
     def insert_latest_videos(self):
-        logging.info("inserting latest videos to db")
+        logger.info("inserting latest videos to db")
         for video in self.youtube.latest_uploaded_videos():
             try:
                 self.video_model.insert(
@@ -67,10 +69,9 @@ class Farmer:
                     publish_time=video.published_time,
                     skipped_finding=True
                 )
-                logging.debug(f"Inserted video {video.id} with publish time {video.published_time}")
+                logger.debug(f"Inserted video {video.id} with publish time {video.published_time}")
             except sqlite3.IntegrityError:
-                logging.debug(f"{video.id} is already in db")
-                pass
+                logger.debug(f"{video.id} is already in db")
 
     def get_new_video_id(self) -> str:
         self.youtube.wait_for_video_count_change()
@@ -102,7 +103,7 @@ class Farmer:
                 text = self.get_text(imag)
                 code = self.compiled_regex.findall(text)
                 if code:
-                    logging.info(f"Code was found with text '{text}'")
+                    logger.info(f"Code was found with text '{text}'")
                     status = self.wolt.redeem_code(code[0])
                     if status == CodeState.SUCCESSFULLY_REDEEM or status == CodeState.EXPIRED or status.ALREADY_TAKEN:
                         return status, text, editor.current_frame
@@ -136,13 +137,13 @@ class Farmer:
         )
 
     def _farm(self):
-        logging.info("starting farmer")
+        logger.info("starting farmer")
         while True:
             new_video_id = self.get_new_video_id()
             if not new_video_id:
-                logging.info("No new video was that is in database was found")
+                logger.info("No new video was that is in database was found")
                 continue
-            logging.info(f"new video with ID {new_video_id}")
+            logger.info(f"new video with ID {new_video_id}")
             self.send_message_discord(f"new video with ID {new_video_id}")
             detailed_new_video = self.youtube.get_details_about_video(new_video_id)
             if not "wolt" in detailed_new_video.description.lower() and not os.environ.get("FORCE_SEARCH", False):
@@ -152,7 +153,7 @@ class Farmer:
                     yt_channel_id=self.youtube.youtube_id,
                     skipped_finding=True
                 )
-                logging.info("In video description is not wolt, skipping")
+                logger.info("In video description is not wolt, skipping")
                 continue
             video_path = Path(f"./temp/video-{detailed_new_video.id}")
             self.youtube.download_video(detailed_new_video.url, (video_path / self.video_name))
@@ -179,7 +180,7 @@ class Farmer:
                 self._farm()
             except requests.exceptions.ConnectionError:
                 # when internet connection is lost, will start pinging to google.com until response come successfully back
-                logging.info(f"Not connection to internet")
+                logger.info(f"Not connection to internet")
                 while True:
                     try:
                         requests.get("https://www.google.com")
@@ -190,7 +191,7 @@ class Farmer:
             except Exception as e:
                 #any other is logged
                 self.discord.send(str(e))
-                logging.exception(e)
+                logger.exception(e)
             #if more then 5 failures in time windows program will end
             failures.append(time.time())
             if len(failures) < 5:

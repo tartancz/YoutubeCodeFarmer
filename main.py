@@ -28,8 +28,6 @@ def main(
         search_value: str,
         code_regex: str,
 ):
-    logging.basicConfig(filename="app.log", filemode="a", encoding="utf-8", level=logging.DEBUG,
-                        format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %H:%M:%S', force=True)
     db_conn = sqlite3.connect(cnstr, detect_types=sqlite3.PARSE_DECLTYPES)
     farmer = Farmer(
         primary_ocr=EasyOcr(search_value),
@@ -57,9 +55,20 @@ def get_env_or_throw_error_msg(env: str, help_msg: str):
     except KeyError:
         raise KeyError(f"Please set the environment variable {env}, help: {help_msg}")
 
+def setLogging():
+    logger = logging.getLogger(os.environ.get("LOGGER_NAME", "FARMER"))
+    logger.setLevel(logging.DEBUG)
+    # create file handler which logs even debug messages
+    fh = logging.FileHandler("app.log")
+    fh.setLevel(logging.DEBUG)
+    fr = logging.Formatter(fmt='%(asctime)s : %(levelname)s : %(filename)s : %(message)s', datefmt="%m/%d/%Y %H:%M:%S")
+    fh.setFormatter(fr)
+
+    logger.addHandler(fh)
 
 if __name__ == '__main__':
     load_dotenv()
+    setLogging()
     main(
         cnstr=get_env_or_throw_error_msg("CNSTR", "Connection string to database"),
         API_KEY=get_env_or_throw_error_msg("API_KEY", "Your API key to youtube"),

@@ -1,3 +1,5 @@
+import logging
+import os
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -6,6 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sqlite3 import Connection
 
+logger = logging.getLogger(os.environ.get("LOGGER_NAME", "FARMER"))
 
 @dataclass
 class Video:
@@ -32,6 +35,7 @@ class VideoModel:
             INSERT INTO video (video_id, yt_channel_id, publish_time, skipped_finding, contain_discount)
             VALUES (?, ?, ?, ?, ?)
         '''
+        logger.debug(f"inserting video with video_id: {video_id}, yt_channel_id: {yt_channel_id}, publish_time: {publish_time}, skipped_finding: {skipped_finding}, skipped_finding: {skipped_finding}, contain_discount: {contain_discount}")
         self._cursor.execute(insert_query, [video_id, yt_channel_id, publish_time, skipped_finding, contain_discount])
         self._db.commit()
 
@@ -47,8 +51,11 @@ class VideoModel:
             FROM video
             where video_id = ?)
         '''
+        logger.debug(f"Finding video which is not in db...")
         for video_id in videos_ids:
             self._cursor.execute(find_query, [video_id])
             if not self._cursor.fetchone()[0]:
+                logger.debug(f"video with ID {video_id} was not found in db")
                 return video_id
+            logger.debug(f"Video with ID {video_id} is in db.")
         return ""

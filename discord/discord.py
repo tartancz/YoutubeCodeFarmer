@@ -1,6 +1,7 @@
 import requests
 
 
+
 class Discord:
     def __init__(self,
                  channel_id: int,
