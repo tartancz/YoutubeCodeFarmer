@@ -199,3 +199,20 @@ class Farmer:
             oldest_exc = failures.pop(0)
             if time.time() - oldest_exc < 1800:
                 return
+
+    def _test(self, video_id: str):
+        video_path = Path(f"./temp/video-{video_id}")
+        self.youtube.download_video(self.youtube.get_video_url(video_id), (video_path / self.video_name))
+        with Editor(video_path=(video_path / self.video_name)) as editor:
+            editor.set_frame(editor.frame_count - 1)
+            for imag in editor.iterate_thought_video():
+                text = self.get_text(imag)
+                code = self.compiled_regex.findall(text)
+                if code:
+                    logger.info(f"Code was found with text '{text}'")
+                    status = self.wolt.redeem_code(code[0])
+                    if status == CodeState.SUCCESSFULLY_REDEEM or status == CodeState.EXPIRED or status.ALREADY_TAKEN:
+                        return status, text, editor.current_frame
+                    elif status == CodeState.TOO_MANY_REQUESTS:
+                        time.sleep(10)
+                editor.add_frames(int(-editor.FPS * 2))

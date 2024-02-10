@@ -47,6 +47,7 @@ def main(
         code_regex=code_regex
     )
     farmer.farm()
+    #farmer._test("_xDh1fhzXbE")
 
 
 def get_env_or_throw_error_msg(env: str, help_msg: str):
@@ -79,3 +80,6 @@ if __name__ == '__main__':
         code_regex=get_env_or_throw_error_msg("CODE_REGEX", "Regex of discount that will be redeemed"),
 
     )
+#TODO PROJET POPISEK VIDEA JESTLI WOLT KOD NENI TAM
+#TODO PROJET CELE VIDEO / JET DALE I KDYZ JSEM UZ NASEL WOLT KOD
+#
