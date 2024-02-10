@@ -73,7 +73,7 @@ class Youtube:
         return f"https://www.youtube.com/watch?v={video_id}"
 
     @staticmethod
-    def download_video(video_url, save_path: Path | str) -> bool:
+    def download_video(video_url: str, save_path: Path | str) -> bool:
         '''
         will download youtube video with the lowest possible resolution
         :param video_url: full url for youtube video
