@@ -1,14 +1,12 @@
 from time import time
-
+import pytest
 from .mocks.youtube_mock import ProgramEndedException
 
 
 def test_overall(farmer):
     start = time()
-    try:
+    with pytest.raises(ProgramEndedException):
         farmer._farm()
-    except ProgramEndedException:
-        pass
     duration = time() - start
     print(f"Mine duration was {duration} seconds")
     assert farmer.discount_model._Discount is not None

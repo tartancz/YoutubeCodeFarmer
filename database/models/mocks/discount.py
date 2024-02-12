@@ -40,3 +40,6 @@ class DiscountModel:
             how_long_to_process=how_long_to_process
         )
         return 1
+
+    def is_code_in_db(self, code: str) -> bool:
+        True
