@@ -102,15 +102,15 @@ class Farmer:
             for imag in editor.iterate_thought_video():
                 text = self.get_text(imag)
                 code = self.compiled_regex.findall(text)
-                if code:
+                if code and not self.discount_model.is_code_in_db(code[0]):
                     logger.info(f"Code was found with text '{text}'")
                     status = self.wolt.redeem_code(code[0])
                     if status == CodeState.SUCCESSFULLY_REDEEM or status == CodeState.EXPIRED or status.ALREADY_TAKEN:
-                        return status, text, editor.current_frame
+                        yield status, text, editor.current_frame
                     elif status == CodeState.TOO_MANY_REQUESTS:
                         time.sleep(10)
                 editor.add_frames(int(-editor.FPS * 2))
-        return status, None, None
+        yield status, None, None
 
     def create_database_log(
             self,
@@ -157,20 +157,20 @@ class Farmer:
                 continue
             video_path = Path(f"./temp/video-{detailed_new_video.id}")
             self.youtube.download_video(detailed_new_video.url, (video_path / self.video_name))
-            status, code, frame = self.process_video(video_path)
-            self.create_database_log(
-                status=status,
-                video_id=detailed_new_video.id,
-                publish_time=detailed_new_video.published_time,
-                frame=frame,
-                code=code,
-            )
-            if status == CodeState.SUCCESSFULLY_REDEEM:
-                self.send_message_discord(
-                    f"Code sucesfully redeem {code}, duration was {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
-            else:
-                self.send_message_discord(
-                    f"Something went wrong, code: {status.name}, duration was  {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
+            for status, code, frame in self.process_video(video_path):
+                self.create_database_log(
+                    status=status,
+                    video_id=detailed_new_video.id,
+                    publish_time=detailed_new_video.published_time,
+                    frame=frame,
+                    code=code,
+                )
+                if status == CodeState.SUCCESSFULLY_REDEEM:
+                    self.send_message_discord(
+                        f"Code sucesfully redeem {code}, duration was {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
+                else:
+                    self.send_message_discord(
+                        f"Something went wrong, code: {status.name}, duration was  {(datetime.now(tz=pytz.UTC) - detailed_new_video.published_time).seconds}")
 
     def farm(self):
         self.discord.send("farming  Created")
@@ -210,9 +210,4 @@ class Farmer:
                 code = self.compiled_regex.findall(text)
                 if code:
                     logger.info(f"Code was found with text '{text}'")
-                    status = self.wolt.redeem_code(code[0])
-                    if status == CodeState.SUCCESSFULLY_REDEEM or status == CodeState.EXPIRED or status.ALREADY_TAKEN:
-                        return status, text, editor.current_frame
-                    elif status == CodeState.TOO_MANY_REQUESTS:
-                        time.sleep(10)
                 editor.add_frames(int(-editor.FPS * 2))

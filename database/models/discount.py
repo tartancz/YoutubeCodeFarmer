@@ -42,3 +42,14 @@ class DiscountModel:
         self._db.commit()
         logger.debug(f"inserting discount to db with video_id:{video_id}, code:{code}, frame:{frame}, was_right:{was_right}, activated_by_me:{activated_by_me}, how_long_to_process:{how_long_to_process}")
         return self._cursor.lastrowid
+
+    def is_code_in_db(self, code: str) -> bool:
+        select_query = '''
+        SELECT 
+        CASE WHEN exists(SELECT * FROM discount WHERE code LIKE %?%) THEN 1
+        ELSE 0
+        END
+        '''
+        self._cursor.execute(select_query, [code])
+        is_in_db,  = self._cursor.fetchone()
+        return is_in_db

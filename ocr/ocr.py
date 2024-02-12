@@ -30,5 +30,5 @@ class OCR(ABC):
         matches = get_close_matches(self.search_value, texts, n=1, cutoff=0.3)
         if matches:
             logger.info(f"Match found in OCR:{self.__class__.__name__}, text: {matches[0]}")
-            return matches[0]
+            return " ".join(texts)
         return ""
