@@ -46,10 +46,10 @@ class DiscountModel:
     def is_code_in_db(self, code: str) -> bool:
         select_query = '''
         SELECT 
-        CASE WHEN exists(SELECT * FROM discount WHERE code LIKE %?%) THEN 1
+        CASE WHEN exists(SELECT * FROM discount WHERE code LIKE ?) THEN 1
         ELSE 0
         END
         '''
-        self._cursor.execute(select_query, [code])
+        self._cursor.execute(select_query, [f"%{code}%"])
         is_in_db,  = self._cursor.fetchone()
         return is_in_db

@@ -49,7 +49,6 @@ def main(
     #farmer.farm()
     farmer._test("o5sJZ1iOTwc")
 
-
 def get_env_or_throw_error_msg(env: str, help_msg: str):
     try:
         return os.environ[env]
