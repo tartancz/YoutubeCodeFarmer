@@ -46,8 +46,8 @@ def main(
         ),
         code_regex=code_regex
     )
-    #farmer.farm()
-    farmer._test("o5sJZ1iOTwc")
+    farmer.farm()
+    #farmer._test("o5sJZ1iOTwc")
 
 def get_env_or_throw_error_msg(env: str, help_msg: str):
     try:
